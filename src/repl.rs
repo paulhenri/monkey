@@ -21,10 +21,10 @@ impl REPL {
         while buffer != ":exit".to_string() {
             let mut mylexer: Lexer = Lexer::new(buffer.clone());
             let mut my_token: Token = Token::new(TokenType::EOF, "".to_string());
-            my_token = mylexer.nextToken();
+            my_token = mylexer.next_token();
             while my_token.tokentype != TokenType::EOF {
                 println!("{:?}", my_token);
-                my_token = mylexer.nextToken();
+                my_token = mylexer.next_token();
             }
             println!("{:?}", TokenType::EOF);
             self.print_line_from_repl(">>".to_string());

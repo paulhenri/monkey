@@ -19,7 +19,7 @@ fn read_char_works() {
     ];
 
     for tok in expected_results.iter() {
-        let mytoken = my_lexer.nextToken();
+        let mytoken = my_lexer.next_token();
         assert_eq!(mytoken.tokentype, *tok);
     }
 }
@@ -59,7 +59,7 @@ fn read_identifier_works() {
     ];
 
     for tok in expected_results.iter() {
-        let mytoken = my_lexer.nextToken();
+        let mytoken = my_lexer.next_token();
         assert_eq!(mytoken.tokentype, *tok);
     }
 }

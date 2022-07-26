@@ -46,11 +46,11 @@ impl Lexer {
     }
 
     /// Processes the next char(s) and return the next token
-    pub fn nextToken(&mut self) -> Token {
+    pub fn next_token(&mut self) -> Token {
         let mut tok_type: TokenType = TokenType::ILLEGAL;
         let mut lit: String = String::from_utf8(vec![self.ch]).unwrap();
         self.skip_whitespace();
-        match (self.ch) {
+        match self.ch {
             0x2b => tok_type = TokenType::PLUS,
             0x2c => tok_type = TokenType::COMMA,
             0x2d => tok_type = TokenType::MINUS,
