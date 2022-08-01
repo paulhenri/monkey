@@ -54,6 +54,23 @@ fn test_return_statement() {
 
 }
 
+fn assert_identifier(test_stmt: Stmt, name: &str) -> bool {
+    if let Stmt::EXPRESSION(Expr::IDENTIFIER(name)) = test_stmt {
+       true 
+    }else{
+        false 
+    }
+}
+
+//#[test]
+fn test_boolean_expression(){
+    let input = "true; false; let foobar = true; let barfoo = false;".to_string();
+    let mut parser = Parser::new(input);
+    let program = parser.parseprogramm();
+    assert_eq!(4, program.len());
+}
+
+
 #[test]
 fn test_identifier_expression(){
     let input = "foobar;".to_string();
@@ -61,11 +78,7 @@ fn test_identifier_expression(){
     let program = parser.parseprogramm();
     assert_eq!(1, program.len());
 
-    let is_identifier = match &program[0] {
-        Stmt::EXPRESSION(Expr::IDENTIFIER(Ident(_x))) => true,
-        _ => false
-    };
-    assert!(is_identifier); 
+    assert!(assert_identifier(program[0].clone(), "foobar"));
 }
 
 
@@ -114,6 +127,7 @@ fn test_operator_precedence(){
     programs_inputs.push(("a+b-c".to_string(), "((a + b) - c)".to_string()));
     programs_inputs.push(("a*b*c".to_string(), "((a * b) * c)".to_string()));
     programs_inputs.push(("a*b/c".to_string(), "((a * b) / c)".to_string()));
+    programs_inputs.push(("1+(2+3)+4".to_string(), "((1 + (2 + 3)) + 4)".to_string()));
 
 
 

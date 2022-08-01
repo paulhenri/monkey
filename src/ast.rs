@@ -3,6 +3,7 @@ use core::fmt;
 use crate::TokenType;
 
 pub type Program = Vec<Stmt>;
+pub type BlockStatement = Vec<Stmt>;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Stmt {
@@ -23,11 +24,14 @@ impl fmt::Display for Stmt {
 impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
         match self{
+            Expr::BOOLEAN(true) => write!(f, "true"),
+            Expr::BOOLEAN(false) => write!(f, "false"),
             Expr::IDENTIFIER(ident) => write!(f, "{}", ident),
             Expr::INTEGER(integ) => write!(f, "{}", integ),
             Expr::BANG(expr) => write!(f, "(!{})", expr),
             Expr::MINUS(expr) => write!(f, "(-{})", expr),
-            Expr::INFIX(inf_expr, operator, post_expr) => write!(f, "({} {} {})", *inf_expr, operator ,*post_expr),    
+            Expr::INFIX(inf_expr, operator, post_expr) => write!(f, "({} {} {})", *inf_expr, operator ,*post_expr), 
+            Expr::IF(_expr, _conseq, _alter) => write!(f, "IF/ELSE"),
         }
     }
 }
@@ -39,7 +43,9 @@ pub enum Expr{
     INTEGER(usize),
     BANG(Box<Expr>),
     MINUS(Box<Expr>),
-    INFIX(Box<Expr>, Infix,Box<Expr>)
+    INFIX(Box<Expr>, Infix,Box<Expr>),
+    BOOLEAN(bool),
+    IF(Box<Expr>, BlockStatement, BlockStatement)
 
 }
 

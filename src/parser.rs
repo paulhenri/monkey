@@ -29,7 +29,9 @@ impl Parser {
             precedences: HashMap::new()
         };
         my_parser.add_prefix_parser(discriminant(&TokenType::IDENT('x'.to_string())), parse_identifier);
-        my_parser.add_prefix_parser(discriminant(&TokenType::INT(5)), parse_integer);
+         my_parser.add_prefix_parser(discriminant(&TokenType::INT(5)), parse_integer);
+         my_parser.add_prefix_parser(discriminant(&TokenType::TRUE), parse_boolean);
+         my_parser.add_prefix_parser(discriminant(&TokenType::FALSE), parse_boolean);
 
         
         my_parser.precedences.insert(discriminant(&TokenType::EQUAL), Precedence::EQUALS);
@@ -123,6 +125,16 @@ impl Parser {
  
     }
 
+    pub fn parse_grouped_expression(&mut self) -> Option<Expr>{
+        self.next_token();
+        let exp = self.parse_expression(Precedence::LOWEST);
+        if !self.expect_next_token(&TokenType::RPAREN) {
+            None
+        }else {
+            exp
+        }
+    }
+
 
     pub fn parse_expression_statement(&mut self) -> Option<Stmt>{
         let expr_stmt = self.parse_expression(Precedence::LOWEST);
@@ -163,6 +175,7 @@ impl Parser {
                     println!("157: Returning a BANG OR MINUS Expression as left member");
                     self.parse_prefix_expression(self.cur_token.tokentype.clone())
                 }   ,
+                TokenType::LPAREN => self.parse_grouped_expression(),
                 _ => {
                         println!("Parsing token for left_expr    {:?}" , &self.cur_token.clone().tokentype);
                         let prefix = self.prefix_parsers.get(&discriminant(&self.cur_token.tokentype));
@@ -235,11 +248,10 @@ impl Parser {
             return None;
         }
 
-        while !self.cur_token_is(&TokenType::SEMICOLON) {
-            self.next_token();
-        }
-        
-       Some(Stmt::LET(Ident(var_name), Expr::IDENTIFIER(Ident("x".to_string())) ))
+        self.next_token();
+      self.parse_expression(Precedence::LOWEST)
+          .map(|n| Stmt::LET(Ident(var_name), n)) 
+
     }
 
     // return wether the current token if of the type passed in parameter
@@ -274,4 +286,12 @@ pub fn parse_integer(token: Token) -> Option<Expr>{
         None
     }
 
+}
+
+pub fn parse_boolean(token: Token) -> Option<Expr>{
+    match token.tokentype {
+      TokenType::TRUE =>  Some(Expr::BOOLEAN(true)),
+      TokenType::FALSE => Some(Expr::BOOLEAN(false)),
+      _ => None
+    }
 }

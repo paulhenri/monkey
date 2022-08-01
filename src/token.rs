@@ -26,7 +26,7 @@ pub enum TokenType {
     LT,
     GT,
     EQUAL,
-    NOTEQUAL,
+    NOTEQUAL
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
