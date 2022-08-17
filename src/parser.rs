@@ -162,6 +162,35 @@ impl Parser {
     }
 
 
+
+    pub fn parse_if_epression(&mut self) -> Option<Expr> {
+        if !self.expect_next_token(&TokenType::LPAREN){
+            return None
+    }
+        self.next_token();
+        let condition = self.parse_expression(Precedence::LOWEST);
+        match condition{
+            Some(condition) => {
+                        if !self.expect_next_token(&TokenType::LPAREN){
+            return None
+        }else {
+                    if !self.expect_next_token(&TokenType::LBRACE){
+            return None
+                }else{
+                    let conseq = self.parse_block_statement();
+                    match conseq {
+                        Some(conseq) => return Some(Expr::IF(Box::new(condition), conseq, conseq)),
+                        None => return None
+                    }
+                }
+        }
+            },
+            None => return None
+        }
+
+
+    }
+
     pub fn is_infixable(&self, tok: &TokenType) -> bool{
         matches!( tok, TokenType::EQUAL  |  TokenType::NOTEQUAL | TokenType::GT  |  TokenType::LT | TokenType::PLUS | TokenType::MINUS | 
                   TokenType::SLASH | TokenType::ASTERISK)
@@ -176,6 +205,7 @@ impl Parser {
                     self.parse_prefix_expression(self.cur_token.tokentype.clone())
                 }   ,
                 TokenType::LPAREN => self.parse_grouped_expression(),
+                TokenType::IF => self.parse_if_expression(),
                 _ => {
                         println!("Parsing token for left_expr    {:?}" , &self.cur_token.clone().tokentype);
                         let prefix = self.prefix_parsers.get(&discriminant(&self.cur_token.tokentype));
