@@ -3,7 +3,10 @@ use core::fmt;
 use crate::TokenType;
 
 pub type Program = Vec<Stmt>;
-pub type BlockStatement = Vec<Stmt>;
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct BlockStatement(Vec<Stmt>);
+//pub type BlockStatement = Vec<Stmt>;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Stmt {
@@ -31,8 +34,25 @@ impl fmt::Display for Expr {
             Expr::BANG(expr) => write!(f, "(!{})", expr),
             Expr::MINUS(expr) => write!(f, "(-{})", expr),
             Expr::INFIX(inf_expr, operator, post_expr) => write!(f, "({} {} {})", *inf_expr, operator ,*post_expr), 
-            Expr::IF(_expr, _conseq, _alter) => write!(f, "IF/ELSE"),
+            Expr::IF(expr, conseq, alter) => {
+                let mut ifstmt = format!("if ({}){{ {} }}", expr, conseq);
+                let BlockStatement(alter_stmts) = alter; 
+                 if alter_stmts.is_empty() {
+                    ifstmt.push_str(format!("else{{ {} }}", alter).as_str());
+                } 
+                write!(f, "{}", ifstmt)
+            },
         }
+    }
+}
+impl fmt::Display for BlockStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
+        let BlockStatement(stmts) = self;
+        let mut block_repr = "".to_string();
+        for val in stmts.iter() {
+          block_repr.push_str( format!( "{}", val).as_str());
+        }
+        write!(f, "{}", block_repr)
     }
 }
 

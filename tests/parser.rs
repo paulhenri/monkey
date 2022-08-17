@@ -140,4 +140,13 @@ fn test_operator_precedence(){
 
 }
 
+#[test]
+fn test_ifelse(){
+    let input = "if (x < y) { x }".to_string();
+    let mut parser = Parser::new(input.clone());
+    let program = parser.parseprogramm();
+    assert_eq!(input, program[0].to_string());
+}
+
+
 
