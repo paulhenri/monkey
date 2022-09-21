@@ -55,11 +55,14 @@ fn test_return_statement() {
 }
 
 fn assert_identifier(test_stmt: Stmt, name: &str) -> bool {
-    if let Stmt::EXPRESSION(Expr::IDENTIFIER(name)) = test_stmt {
-       true 
-    }else{
-        false 
-    }
+    let cmp_stmt = Stmt::EXPRESSION(Expr::IDENTIFIER(Ident(name.to_string())));
+    matches!(cmp_stmt, test_stmt)
+}
+
+
+fn assert_identifier_expr(test_expr: Expr, name: &str) -> bool{
+    let cmp_stmt = Expr::IDENTIFIER(Ident(name.to_string()));
+    matches!(cmp_stmt, test_stmt)
 }
 
 //#[test]
@@ -148,5 +151,65 @@ fn test_ifelse(){
     assert_eq!(input, program[0].to_string());
 }
 
+#[test]
+fn test_functions(){
+    type ProgramInput = (String, usize, Vec<String>);
+    let mut program_inputs : Vec<ProgramInput> = Vec::new();
+    program_inputs.push(("fn(x, y) { x + y}".to_string(), 2, vec!["x".to_string(), "y".to_string()]));
+    program_inputs.push(("fn(x) { x + y}".to_string(), 1, vec!["x".to_string()]));
+    program_inputs.push(("fn() { x + y}".to_string(), 0, vec![]));
 
+
+    for (input, args_nb, args_vec) in program_inputs.iter(){
+        let mut parser = Parser::new(input.clone());
+        let program = parser.parseprogramm();
+        assert_eq!(program.len(), 1);
+
+        if let Stmt::EXPRESSION(Expr::FUNC(Parameters(param_list), _stmt)) = program[0].clone() {
+            assert_eq!(param_list.len(), *args_nb);
+
+        //Now let's compare identifiers and strings in the vector
+        for i in 0..args_vec.len() {
+            if let Expr::IDENTIFIER(Ident(identifier_name)) = param_list[i].clone() {
+                assert_eq!(identifier_name, args_vec[i]);
+            }
+        }
+        }else {
+            println!("Expected an Express, go {:?} instead", program[0].clone());
+            panic!() 
+        }
+
+
+
+
+    }
+
+}
+
+
+#[test]
+fn test_function_call(){
+    type ProgramInput = (String, usize, Vec<String>);
+    let mut program_inputs : Vec<ProgramInput> = Vec::new();
+    program_inputs.push(("add(1, 2 * 5, 4 + 5)".to_string(), 3, vec!["1".to_string(), "2 * 5".to_string(), "4 + 5".to_string()]));
+
+    // Here we should use herlpers already coded to test infix on args and identifiers for the first arg - A full automated suite 
+    // can be hard to design at first glance so baby steps to ensure that a basic case is covered.
+    for (input, _args_nb, test_args) in program_inputs.iter() {
+        let mut parser = Parser::new(input.clone());
+        let program = parser.parseprogramm();
+        assert_eq!(program.len(), 1);
+        if let Stmt::EXPRESSION(Expr::CALL(func_identifier, Parameters(args))) = program[0].clone(){
+            assert!(assert_identifier_expr(*func_identifier, "add"));
+            assert_eq!(args.len(), test_args.len());
+            for i in 0..test_args.len() {
+                assert_eq!(test_args[i], args[i].to_string()); 
+            }
+        
+        }else {
+             println!("Expected an Express, go {:?} instead", program[0].clone());
+            panic!() 
+        }
+    }
+}
 

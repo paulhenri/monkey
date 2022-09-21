@@ -26,20 +26,20 @@ pub enum TokenType {
     LT,
     GT,
     EQUAL,
-    NOTEQUAL
+    NOTEQUAL,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Token {
     pub tokentype: TokenType,
-    pub literal: String
+    pub literal: String,
 }
 
 impl Token {
     pub fn new(tktype: TokenType, literal: String) -> Token {
         Token {
             tokentype: tktype,
-            literal 
+            literal,
         }
     }
 }

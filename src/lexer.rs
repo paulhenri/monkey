@@ -2,12 +2,12 @@
 use crate::token::{Token, TokenType};
 use crate::TokenBuilder;
 
+// Struct used to read and lex the entire code
 pub struct Lexer {
     input: Vec<u8>,
     position: usize,
-    readPosition: usize,
+    read_position: usize,
     ch: u8,
-    tok_builder: TokenBuilder,
 }
 impl Lexer {
     /// Builder of the lexer - Returns a Lexer struct
@@ -16,9 +16,8 @@ impl Lexer {
         let mut mylexer = Lexer {
             input: input.as_bytes().to_vec(),
             position: 0,
-            readPosition: 0,
+            read_position: 0,
             ch: 0,
-            tok_builder: TokenBuilder::default(),
         };
         mylexer.read_char();
         mylexer
@@ -26,28 +25,28 @@ impl Lexer {
 
     /// Read the next char and advance the reading position
     pub fn read_char(&mut self) {
-        if let Some(&ch) = self.input.get(self.readPosition) {
+        if let Some(&ch) = self.input.get(self.read_position) {
             self.ch = ch;
         } else {
             self.ch = 0;
         }
-        self.position = self.readPosition;
-        self.readPosition += 1;
+        self.position = self.read_position;
+        self.read_position += 1;
     }
 
     /// Read the next char but does not advance the reading position. Usefull to recognise 2 or 3
     /// characters keywords (e.g.  ==, != )
     pub fn peek_char(&mut self) -> u8 {
-        if let Some(&next_char) = self.input.get(self.readPosition) {
-            return next_char;
+        if let Some(&next_char) = self.input.get(self.read_position) {
+            next_char
         } else {
-            return 0;
+            0
         }
     }
 
     /// Processes the next char(s) and return the next token
     pub fn next_token(&mut self) -> Token {
-        let mut tok_type: TokenType = TokenType::ILLEGAL;
+        let tok_type: TokenType;
         let mut lit: String = String::from_utf8(vec![self.ch]).unwrap();
         self.skip_whitespace();
         match self.ch {
@@ -97,7 +96,7 @@ impl Lexer {
         }
 
         self.read_char();
-        return Token::new(tok_type, lit);
+        Token::new(tok_type, lit)
     }
 
     /// Loop through the input until a non number character is found
@@ -109,7 +108,7 @@ impl Lexer {
             my_number.push(self.ch);
             self.read_char();
         }
-        return String::from_utf8(my_number).unwrap();
+        String::from_utf8(my_number).unwrap()
     }
 
     /// Read an identifier from the current position until something else than a character is found
@@ -132,14 +131,12 @@ impl Lexer {
 
 /// Check is a given character (Given as UTF8 byte) is a valid letter for identifier / function
 pub fn is_valid_letter(letter: u8) -> bool {
-    return (letter >= 0x41 && letter <= 0x5a)
-        || (letter >= 0x61 && letter <= 0x7a)
-        || letter == 0x5f;
+    (letter >= 0x41 && letter <= 0x5a) || (letter >= 0x61 && letter <= 0x7a) || letter == 0x5f
 }
 
 /// Checks if the current character is a valid number from the UTF-8 table.
 pub fn is_valid_number(letter: u8) -> bool {
-    return letter >= 0x30 && letter <= 0x39;
+    letter >= 0x30 && letter <= 0x39
 }
 
 /// Create a token from a identifier given as parameter
