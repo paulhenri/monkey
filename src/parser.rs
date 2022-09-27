@@ -331,10 +331,10 @@ impl Parser {
     }
 
     pub fn parse_return_statement(&mut self) -> Option<Stmt> {
-        let expr = Expr::IDENTIFIER(Ident("x".to_string()));
-        while !self.cur_token_is(&TokenType::SEMICOLON) {
-            self.next_token();
-        }
+        let expr = self.parse_expression(Precedence::LOWEST).unwrap();
+        if !self.peek_token_is(&TokenType::SEMICOLON){
+           self.next_token();
+           }
         Some(Stmt::RETURN(expr))
     }
 
@@ -349,8 +349,12 @@ impl Parser {
         }
 
         self.next_token();
-        self.parse_expression(Precedence::LOWEST)
-            .map(|n| Stmt::LET(Ident(var_name), n))
+        let result =    self.parse_expression(Precedence::LOWEST)
+            .map(|n| Stmt::LET(Ident(var_name), n));
+        if self.peek_token_is(&TokenType::SEMICOLON){
+            self.next_token();
+        }
+        result
     }
 
     // return wether the current token if of the type passed in parameter

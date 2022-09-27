@@ -8,27 +8,30 @@ use Monkey::Parser;
 fn test_let_statement() {
     let input : String = " 
             let x = 5;
-            let y = 10;
-            let z = 8383333;
+            let y = true;
+            let z = foobar;
         ".to_string();
     let mut parser = Parser::new(input);
    let program : Program = parser.parseprogramm();
 
    assert_eq!(3, program.len());
 
-   let  input_array : [(TokenType, String); 3] = [(TokenType::LET, "x".to_string()), (TokenType::LET, "y".to_string()), (TokenType::LET, "foobar".to_string())];
+   let  input_array : [(TokenType, String, String); 3] = [(TokenType::LET, "x".to_string(), "5".to_string()), (TokenType::LET, "y".to_string(), "true".to_string()), (TokenType::LET, "z".to_string(), "foobar".to_string())];
    for i in 0..program.len()-1 { 
-       let (_toktype, name) = &input_array[i];
-       assert!(assert_let_statement(program[i].clone(), name));
+       let (_toktype, name, expr) = &input_array[i];
+       assert!(assert_let_statement(program[i].clone(), name, expr));
    }
 
 }
 
-fn assert_let_statement(test_stmt: Stmt, name: &str) -> bool {
+fn assert_let_statement(test_stmt: Stmt, name: &str, expected_expr: &str) -> bool {
 
-    if let Stmt::LET(var_name, _expr) = test_stmt {
-    //First, we check that our statement has a LET Token
-    var_name.eq(&Ident(name.to_string()))
+    if let Stmt::LET(var_name, expr) = test_stmt {
+    // First, we check that our statement has a LET Token
+    // The method **seems** quite imperfect as the test only check if the to_string()
+    // representation is equal. Collisions could occur and give false positives.
+    // A more thorough method would be to check for Expr types.
+    var_name.eq(&Ident(name.to_string())) && expr.to_string().eq(&expected_expr.to_string())
     }else {
       false 
     }
@@ -44,8 +47,8 @@ fn test_return_statement() {
     let mut parser = Parser::new(input);
     let program : Program = parser.parseprogramm();
     assert_eq!(3, program.len());
-    for i in 0..program.len()-1 {
-       match program[i]  {
+    for val in program.into_iter() {
+       match val  {
             Stmt::RETURN(_) => {},
             _ => panic!("This is not a return statement !"),
        } 
@@ -191,7 +194,7 @@ fn test_functions(){
 fn test_function_call(){
     type ProgramInput = (String, usize, Vec<String>);
     let mut program_inputs : Vec<ProgramInput> = Vec::new();
-    program_inputs.push(("add(1, 2 * 5, 4 + 5)".to_string(), 3, vec!["1".to_string(), "2 * 5".to_string(), "4 + 5".to_string()]));
+    program_inputs.push(("add(1, 2 * 5, 4 + 5)".to_string(), 3, vec!["1".to_string(), "(2 * 5)".to_string(), "(4 + 5)".to_string()]));
 
     // Here we should use herlpers already coded to test infix on args and identifiers for the first arg - A full automated suite 
     // can be hard to design at first glance so baby steps to ensure that a basic case is covered.
